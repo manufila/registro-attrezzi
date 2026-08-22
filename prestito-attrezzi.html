@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Attrezzi — Filannino</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#1e1e1c;
+    --bg-panel:#262624;
+    --bg-card:#2d2d2a;
+    --metal:#3a3a36;
+    --line:#48473f;
+    --rust:#c97a3d;
+    --rust-dark:#8f5426;
+    --rust-light:#f0c496;
+    --ok:#7a9d54;
+    --ok-dark:#4e6b35;
+    --warn:#c9573d;
+    --warn-dark:#8f3d29;
+    --text:#efe9df;
+    --text-dim:#a8a49a;
+    --text-faint:#726e64;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 60px;}
+
+  .header{display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-bottom:18px;border-bottom:2px solid var(--line);}
+  .header .badge{width:46px;height:46px;border-radius:6px;background:var(--metal);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:'Oswald';font-size:20px;color:var(--rust);flex-shrink:0;}
+  .header h1{font-family:'Oswald';font-weight:600;font-size:21px;margin:0;letter-spacing:0.3px;}
+  .header p{margin:2px 0 0;font-size:13px;color:var(--text-dim);}
+
+  .tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--bg-panel);border:1px solid var(--line);border-radius:8px;padding:4px;}
+  .tab{flex:1;text-align:center;padding:10px 6px;border-radius:6px;font-family:'Oswald';font-size:13px;letter-spacing:0.4px;color:var(--text-dim);cursor:pointer;transition:background .15s,color .15s;user-select:none;}
+  .tab.active{background:var(--rust-dark);color:#fff;}
+  .tab .count{display:inline-block;margin-left:6px;background:rgba(0,0,0,0.25);border-radius:10px;padding:1px 7px;font-size:11px;font-family:'Inter';}
+
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  label{display:block;font-size:12px;color:var(--text-dim);margin:0 0 5px;font-weight:500;}
+  input[type=text],input[type=date]{width:100%;background:var(--bg-panel);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:10px 12px;font-size:15px;font-family:'Inter';}
+  input[type=text]:focus,input[type=date]:focus{outline:none;border-color:var(--rust);}
+  .field{margin-bottom:14px;}
+  .field-err{color:var(--warn);font-size:12px;margin-top:5px;display:none;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--rust-dark);color:#fff;border:none;border-radius:6px;padding:12px 18px;font-family:'Oswald';font-size:14px;letter-spacing:0.4px;cursor:pointer;width:100%;transition:background .15s;}
+  .btn:hover{background:var(--rust);}
+  .btn.secondary{background:transparent;border:1px solid var(--line);color:var(--text-dim);width:auto;padding:8px 14px;font-family:'Inter';font-size:13px;letter-spacing:0;}
+  .btn.secondary:hover{border-color:var(--ok);color:var(--ok);background:rgba(122,157,84,0.08);}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--text-faint);}
+  .empty .icon{font-size:30px;margin-bottom:10px;opacity:.6;}
+  .empty p{margin:4px 0;font-size:14px;}
+
+  /* tag = signature element: hanging tool-checkout tag */
+  .tag{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:14px 16px 14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:14px;}
+  .tag::before{content:'';position:absolute;left:8px;top:50%;transform:translateY(-50%);width:9px;height:9px;border-radius:50%;background:var(--bg);border:2px solid var(--text-faint);}
+  .tag.overdue{border-color:var(--warn-dark);}
+  .tag.overdue::before{border-color:var(--warn);}
+  .tag-body{flex:1;min-width:0;}
+  .tag-tool{font-family:'Oswald';font-size:16px;font-weight:500;margin:0 0 3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tag-meta{font-size:13px;color:var(--text-dim);margin:0;}
+  .tag-meta b{color:var(--text);font-weight:500;}
+  .tag-days{font-size:11px;color:var(--warn);margin-top:3px;font-weight:600;}
+  .tag-actions{flex-shrink:0;}
+
+  .hist-row{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);}
+  .hist-row:last-child{border-bottom:none;}
+  .hist-dot{width:8px;height:8px;border-radius:50%;background:var(--ok-dark);flex-shrink:0;}
+  .hist-body{flex:1;min-width:0;}
+  .hist-tool{font-size:14px;font-weight:500;margin:0;}
+  .hist-meta{font-size:12px;color:var(--text-dim);margin:2px 0 0;}
+
+  .section-label{font-size:12px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.8px;margin:0 0 10px;font-weight:600;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ok-dark);color:#fff;padding:10px 20px;border-radius:6px;font-size:13px;opacity:0;transition:all .25s;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="badge">FR</div>
+    <div>
+      <h1>Registro attrezzi</h1>
+      <p>Filannino Rettifiche Motori — prestiti in officina</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="nuovo">Nuovo prestito</div>
+    <div class="tab" data-tab="inprestito">In prestito<span class="count" id="count-attivi">0</span></div>
+    <div class="tab" data-tab="storico">Storico</div>
+  </div>
+
+  <div class="panel active" id="panel-nuovo">
+    <div class="field">
+      <label for="in-attrezzo">Attrezzo</label>
+      <input type="text" id="in-attrezzo" placeholder="es. chiave dinamometrica 1/2">
+      <div class="field-err" id="err-attrezzo">Inserisci il nome dell'attrezzo</div>
+    </div>
+    <div class="field">
+      <label for="in-persona">Prestato a</label>
+      <input type="text" id="in-persona" placeholder="es. Nicola">
+      <div class="field-err" id="err-persona">Inserisci il nome della persona</div>
+    </div>
+    <div class="field">
+      <label for="in-data">Data prestito</label>
+      <input type="date" id="in-data">
+    </div>
+    <button class="btn" id="btn-salva">Registra prestito</button>
+  </div>
+
+  <div class="panel" id="panel-inprestito">
+    <div id="lista-attivi"></div>
+  </div>
+
+  <div class="panel" id="panel-storico">
+    <div id="lista-storico"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'prestiti-attrezzi';
+let prestiti = [];
+
+function oggi(){ return new Date().toISOString().slice(0,10); }
+function fmtData(iso){
+  const [y,m,d] = iso.split('-');
+  return d+'/'+m+'/'+y;
+}
+function giorniTraOggi(iso){
+  const a = new Date(iso), b = new Date(oggi());
+  return Math.round((b-a)/86400000);
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+function caricaDati(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    prestiti = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    prestiti = [];
+  }
+  render();
+}
+
+function salvaDati(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prestiti));
+  }catch(e){
+    mostraToast('Errore nel salvataggio dei dati');
+  }
+}
+
+function mostraToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+document.getElementById('in-data').value = oggi();
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+document.getElementById('btn-salva').addEventListener('click', async ()=>{
+  const attrezzo = document.getElementById('in-attrezzo').value.trim();
+  const persona = document.getElementById('in-persona').value.trim();
+  const data = document.getElementById('in-data').value;
+  const errA = document.getElementById('err-attrezzo');
+  const errP = document.getElementById('err-persona');
+  errA.style.display = 'none';
+  errP.style.display = 'none';
+
+  let ok = true;
+  if(!attrezzo){ errA.style.display='block'; ok=false; }
+  if(!persona){ errP.style.display='block'; ok=false; }
+  if(!ok) return;
+
+  prestiti.push({
+    id: uid(),
+    attrezzo, persona,
+    dataPrestito: data || oggi(),
+    dataRestituzione: null,
+    restituito: false
+  });
+
+  await salvaDati();
+  document.getElementById('in-attrezzo').value = '';
+  document.getElementById('in-persona').value = '';
+  document.getElementById('in-data').value = oggi();
+  mostraToast('Prestito registrato');
+  render();
+});
+
+async function segnaRestituito(id){
+  const p = prestiti.find(x=>x.id===id);
+  if(!p) return;
+  p.restituito = true;
+  p.dataRestituzione = oggi();
+  await salvaDati();
+  mostraToast(p.attrezzo + ' segnato come restituito');
+  render();
+}
+
+function render(){
+  const attivi = prestiti.filter(p=>!p.restituito).sort((a,b)=>a.dataPrestito.localeCompare(b.dataPrestito));
+  const storico = prestiti.filter(p=>p.restituito).sort((a,b)=>b.dataRestituzione.localeCompare(a.dataRestituzione));
+
+  document.getElementById('count-attivi').textContent = attivi.length;
+
+  const listaAttivi = document.getElementById('lista-attivi');
+  if(attivi.length === 0){
+    listaAttivi.innerHTML = '<div class="empty"><div class="icon">&#9875;</div><p><b>Nessun attrezzo in prestito.</b></p><p>Quando registri un prestito, comparirà qui.</p></div>';
+  } else {
+    listaAttivi.innerHTML = attivi.map(p=>{
+      const giorni = giorniTraOggi(p.dataPrestito);
+      const overdue = giorni >= 14;
+      return '<div class="tag'+(overdue?' overdue':'')+'">'
+        + '<div class="tag-body">'
+        + '<p class="tag-tool">'+escapeHtml(p.attrezzo)+'</p>'
+        + '<p class="tag-meta">Prestato a <b>'+escapeHtml(p.persona)+'</b> — dal '+fmtData(p.dataPrestito)+'</p>'
+        + (overdue ? '<p class="tag-days">In prestito da '+giorni+' giorni</p>' : '')
+        + '</div>'
+        + '<div class="tag-actions"><button class="btn secondary" data-id="'+p.id+'">Segna restituito</button></div>'
+        + '</div>';
+    }).join('');
+    listaAttivi.querySelectorAll('button[data-id]').forEach(b=>{
+      b.addEventListener('click', ()=>segnaRestituito(b.dataset.id));
+    });
+  }
+
+  const listaStorico = document.getElementById('lista-storico');
+  if(storico.length === 0){
+    listaStorico.innerHTML = '<div class="empty"><div class="icon">&#128220;</div><p><b>Nessun prestito restituito.</b></p><p>Lo storico si riempie quando segni un attrezzo come restituito.</p></div>';
+  } else {
+    listaStorico.innerHTML = '<p class="section-label">'+storico.length+' prestito/i concluso/i</p>'
+      + storico.map(p=>{
+        return '<div class="hist-row">'
+          + '<div class="hist-dot"></div>'
+          + '<div class="hist-body">'
+          + '<p class="hist-tool">'+escapeHtml(p.attrezzo)+'</p>'
+          + '<p class="hist-meta">'+escapeHtml(p.persona)+' — dal '+fmtData(p.dataPrestito)+' al '+fmtData(p.dataRestituzione)+'</p>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+  }
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+caricaDati();
+</script>
+</body>
+</html>
